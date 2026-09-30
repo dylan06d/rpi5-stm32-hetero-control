@@ -1,0 +1,48 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,brcm2835";
+
+    // 引脚复用与拉状态配置
+    fragment@0 {
+        target = <&gpio>;
+        __overlay__ {
+            pir_pins: pir_pins {
+                brcm,pins = <17>;      //gpio17
+                brcm,function = <0>;   // input模式
+                brcm,pull = <1>;       // 下拉
+            };
+
+            relay_pins: relay_pins {
+                brcm,pins = <27>;    // gpio27
+                brcm,function = <1>; // output模式
+                brcm,pull = <0>;     // 无拉阻
+            };
+        };
+    };
+
+    // 定义设备节点
+    fragment@1 {
+        target-path = "/";
+        __overlay__ {
+            my_pir_device: pir_sensor {
+                compatible = "custom,pir-sensor";
+                pinctrl-names = "default";
+                pinctrl-0 = <&pir_pins>;
+                gpios = <&gpio 17 0>;
+                interrupt-parent = <&gpio>;
+                interrupts = <17 1>;
+                status = "okay";
+            };
+
+            my_relay_device: relay_5v {
+                compatible = "custom,5v-relay";
+                pinctrl-names = "default";
+                pinctrl-0 = <&relay_pins>;
+                gpios = <&gpio 27 0>;
+                status = "okay";
+            };
+        };
+    };
+};
